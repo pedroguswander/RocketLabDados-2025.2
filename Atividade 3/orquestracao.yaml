@@ -1,0 +1,41 @@
+resources:
+  jobs:
+    Orquestration_Atividade_3:
+      name: Orquestration - Atividade 3
+      schedule:
+        quartz_cron_expression: 14 0 13 * * ?
+        timezone_id: America/Sao_Paulo
+        pause_status: UNPAUSED
+      tasks:
+        - task_key: run_bronze_ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/pedrodgus@gmail.com/RocketLabDados-2025.2/Atividade
+              2/landing_to_bronze
+            base_parameters:
+              data_inicio_formatada: 11-27-2016
+              data_fim_formatada: 09-09-2020
+            source: WORKSPACE
+        - task_key: run_silver_transform
+          depends_on:
+            - task_key: run_bronze_ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/pedrodgus@gmail.com/RocketLabDados-2025.2/Atividade
+              2/bronze_to_silver
+            source: WORKSPACE
+        - task_key: run_gold_aggregate
+          depends_on:
+            - task_key: run_silver_transform
+          notebook_task:
+            notebook_path: /Workspace/Users/pedrodgus@gmail.com/RocketLabDados-2025.2/Atividade
+              3/silver_to_gold
+            base_parameters:
+              data_inicio: 2016-08-09
+              data_fim: 2020-08-09
+            source: WORKSPACE
+      git_source:
+        git_url: https://github.com/pedroguswander/RocketLabDados-2025.2
+        git_provider: gitHub
+        git_branch: main
+      queue:
+        enabled: true
+      performance_target: PERFORMANCE_OPTIMIZED
